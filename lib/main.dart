@@ -1,3 +1,4 @@
+import 'package:connectivity_wrapper/connectivity_wrapper.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -11,7 +12,10 @@ void main() async {
   await Firebase.initializeApp();
   // call LazyUi.config() before runApp()
   // to set your own default values, such as: theme, font, spacing, etc.
-  LazyUi.config(theme: AppTheme.light, font: TextStyle(fontSize: 18));
+  LazyUi.config(
+    theme: AppTheme.light,
+    font: Gfont.black.copyWith(fontSize: 18),
+  );
 
   runApp(
     MyApp(),
@@ -23,19 +27,28 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
-      title: 'Application',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+    return ConnectivityAppWrapper(
+      app: GetMaterialApp(
+        title: 'Application',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        initialRoute: AppPages.INITIAL,
+        getPages: AppPages.routes,
+        builder: (BuildContext context, Widget? widget) {
+          // use LazyUi.builder to wrap your widget
+          // so that you can use LzToast and setting maxScalingFontSize
+          return LazyUi.builder(
+              context,
+              ConnectivityWidgetWrapper(
+                child: widget!,
+                disableInteraction: true,
+                height: 80,
+              ),
+              maxScalingFontSize: 1.1);
+        },
       ),
-      initialRoute: AppPages.INITIAL,
-      getPages: AppPages.routes,
-      builder: (BuildContext context, Widget? widget) {
-        // use LazyUi.builder to wrap your widget
-        // so that you can use LzToast and setting maxScalingFontSize
-        return LazyUi.builder(context, widget, maxScalingFontSize: 1.1);
-      },
     );
   }
 }

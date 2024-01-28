@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
 import 'package:iot_app/app/modules/arduino_settings/views/arduino_info_view.dart';
+import 'package:iot_app/app/modules/arduino_settings/views/wifi_view.dart';
 import 'package:iot_app/app/modules/widget/custom_widget.dart';
 import 'package:lazyui/lazyui.dart';
 
@@ -31,6 +32,8 @@ class ArduinoSettingsView extends GetView<ArduinoSettingsController> {
               return WiListTile.list(icon[i], title[i], () {
                 if (i == 0) {
                   Get.to(() => ArduinoInfoView());
+                } else {
+                  Get.to(() => WifiView());
                 }
               });
             })
