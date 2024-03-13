@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-
 import 'package:get/get.dart';
+import 'package:iot_app/app/modules/water_pump/controllers/water_pump_controller.dart';
 import 'package:iot_app/app/modules/water_pump/views/water_pump_view.dart';
-import 'package:iot_app/app/routes/app_pages.dart';
+import 'package:iot_app/app/modules/widget/custom_widget.dart';
 import 'package:lazyui/lazyui.dart';
 
 import '../controllers/home_controller.dart';
@@ -102,7 +102,11 @@ class HomeView extends GetView<HomeController> {
 
                           return InkTouch(
                             onTap: () {
-                              Get.dialog(WaterPumpView());
+                              Get.dialog(WaterPumpView()).then((value) {
+                                if (value != null) {
+                                  controller.updatePumpStatus();
+                                }
+                              });
                             },
                             child: Container(
                               width: Get.width * 0.28,
@@ -138,6 +142,8 @@ class HomeView extends GetView<HomeController> {
                         String powerModePump =
                             controller.isPumpOn.value ? 'ON' : 'OFF';
 
+                        bool isHidden = controller.selectedValueRx.value == 0;
+
                         return Column(
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: Caa.start,
@@ -148,6 +154,13 @@ class HomeView extends GetView<HomeController> {
                                 color: Colors.white,
                               ),
                             ),
+                            isHidden
+                                ? None()
+                                : Text(
+                                    'Durasi : Pompa Hidup Selama ${controller.form.value.values} ',
+                                    style: Gfont.fs16.copyWith(
+                                      color: Colors.white,
+                                    )),
                           ],
                         );
                       }),

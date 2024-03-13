@@ -1,4 +1,6 @@
 // Widget List Tile With InkWell
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lazyui/lazyui.dart';
@@ -237,5 +239,52 @@ class WiDialogForm extends StatelessWidget {
             )),
       ),
     ]));
+  }
+}
+
+class CountdownTimerWidget extends StatefulWidget {
+  final int seconds;
+
+  CountdownTimerWidget({Key? key, required this.seconds}) : super(key: key);
+
+  @override
+  _CountdownTimerWidgetState createState() => _CountdownTimerWidgetState();
+}
+
+class _CountdownTimerWidgetState extends State<CountdownTimerWidget> {
+  late int remainingSeconds;
+  late Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    remainingSeconds = widget.seconds;
+    if (remainingSeconds > 0) {
+      _startTimer();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return remainingSeconds <= 0
+        ? Text('Timer Finished')
+        : Text('Remaining Time: $remainingSeconds seconds');
+  }
+
+  void _startTimer() {
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      setState(() {
+        remainingSeconds--;
+        if (remainingSeconds <= 0) {
+          _timer?.cancel();
+        }
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
   }
 }
