@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
+import 'package:iot_app/app/modules/water_pump/views/water_pump_view.dart';
 import 'package:iot_app/app/routes/app_pages.dart';
 import 'package:lazyui/lazyui.dart';
 
@@ -18,32 +19,6 @@ class HomeView extends GetView<HomeController> {
           'Smart Pump Control',
           style: Gfont.fs20.copyWith(color: Colors.white),
         )),
-        floatingActionButton: InkWell(
-          onTap: () {
-            controller.updatePowerPumpStatus();
-          },
-          child: Container(
-            width: Get.width * 0.2,
-            height: Get.width * 0.2,
-            decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    spreadRadius: 1,
-                    blurRadius: 10,
-                    offset: Offset(0, 3), // changes position of shadow
-                  ),
-                ],
-                border: Br.all(color: Colors.black),
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(100)),
-            child: Icon(
-              Ti.power,
-              size: Get.width * 0.1,
-              color: Colors.blue.withOpacity(0.5),
-            ),
-          ),
-        ),
         body: SingleChildScrollView(
           physics: BounceScroll(),
           child: Container(
@@ -118,16 +93,16 @@ class HomeView extends GetView<HomeController> {
                         spacing: 10,
                         children: List.generate(1, (i) {
                           List<IconData> icon = [
-                            Ti.settings,
+                            Ti.power,
                           ];
 
                           List<String> title = [
-                            'Pengaturan Arduino',
+                            'Hidupkan Pompa Air',
                           ];
 
                           return InkTouch(
                             onTap: () {
-                              Get.toNamed(Routes.ARDUINO_SETTINGS);
+                              Get.dialog(WaterPumpView());
                             },
                             child: Container(
                               width: Get.width * 0.28,
@@ -162,20 +137,13 @@ class HomeView extends GetView<HomeController> {
                       Obx(() {
                         String powerModePump =
                             controller.isPumpOn.value ? 'ON' : 'OFF';
-                        String powerModeArduino =
-                            controller.isArduinoOn.value ? 'ON' : 'OFF';
+
                         return Column(
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: Caa.start,
                           children: [
                             Text(
                               'WaterPump Power : $powerModePump',
-                              style: Gfont.fs16.copyWith(
-                                color: Colors.white,
-                              ),
-                            ),
-                            Text(
-                              'Arduino Power : $powerModeArduino',
                               style: Gfont.fs16.copyWith(
                                 color: Colors.white,
                               ),

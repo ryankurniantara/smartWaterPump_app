@@ -14,7 +14,11 @@ void main() async {
   // to set your own default values, such as: theme, font, spacing, etc.
   LazyUi.config(
     theme: AppTheme.light,
-    font: Gfont.black.copyWith(fontSize: 18),
+    font: Gfont.black.copyWith(
+        fontSize: 20,
+        color: Colors.black,
+        height: 1.5,
+        fontStyle: FontStyle.normal),
   );
 
   runApp(
