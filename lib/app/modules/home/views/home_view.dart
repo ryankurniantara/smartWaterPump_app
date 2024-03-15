@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:iot_app/app/modules/water_pump/controllers/water_pump_controller.dart';
-import 'package:iot_app/app/modules/water_pump/views/water_pump_view.dart';
-import 'package:iot_app/app/modules/widget/custom_widget.dart';
-import 'package:lazyui/lazyui.dart';
-
+import 'package:lazyui/lazyui.dart' hide SelectPicker;
+import '../../widget/custom_widget.dart';
 import '../controllers/home_controller.dart';
 
 class HomeView extends GetView<HomeController> {
@@ -97,15 +94,22 @@ class HomeView extends GetView<HomeController> {
                           ];
 
                           List<String> title = [
-                            'Hidupkan Pompa Air',
+                            'Pompa Air',
                           ];
 
                           return InkTouch(
                             onTap: () {
-                              Get.dialog(WaterPumpView()).then((value) {
-                                if (value != null) {
-                                  controller.updatePumpStatus();
-                                }
+                              SelectPicker.show(context,
+                                  options: controller.durasiPompaHidup,
+                                  fullScreen: false,
+                                  textConfirm: 'Pilih', onSelect: (selector) {
+                                final _ctrl = Get.find<HomeController>();
+                                // logg(selector.value, name: 'Selected');
+
+                                _ctrl.selectedValue = selector.value;
+                                _ctrl.selectedValueRx.value = selector.value;
+                                controller.updatePumpStatus();
+                                controller.form.reset();
                               });
                             },
                             child: Container(
@@ -139,10 +143,16 @@ class HomeView extends GetView<HomeController> {
                         height: Get.height * 0.02,
                       ),
                       Obx(() {
+                        controller.selectedValueRx.value;
                         String powerModePump =
                             controller.isPumpOn.value ? 'ON' : 'OFF';
 
-                        bool isHidden = controller.selectedValueRx.value == 0;
+                        bool isHidden = controller.selectedValueRx < 0 ||
+                            controller.selectedValue == 0 ||
+                            controller.selectedValueRx == 1;
+
+                        logg(controller.selectedValueRx.value,
+                            name: 'Selected Value');
 
                         return Column(
                           mainAxisSize: MainAxisSize.min,
@@ -156,11 +166,8 @@ class HomeView extends GetView<HomeController> {
                             ),
                             isHidden
                                 ? None()
-                                : Text(
-                                    'Durasi : Pompa Hidup Selama ${controller.form.value.values} ',
-                                    style: Gfont.fs16.copyWith(
-                                      color: Colors.white,
-                                    )),
+                                : SecondCountDown(
+                                    controller.selectedValueRx.value),
                           ],
                         );
                       }),

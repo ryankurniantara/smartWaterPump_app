@@ -1,8 +1,9 @@
 // Widget List Tile With InkWell
 import 'dart:async';
-
+import 'dart:math';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide ContextExtensionss;
 import 'package:lazyui/lazyui.dart';
 
 class WiListTile extends StatelessWidget {
@@ -205,35 +206,35 @@ class WiDialogForm extends StatelessWidget {
                       children: children,
                     ),
                   ),
-                  Container(
-                    decoration: BoxDecoration(
-                        border: Border(
-                            top: Br.side(Colors.black26.withOpacity(0.1)))),
-                    child: Intrinsic(
-                      children: List.generate(
-                        2,
-                        (i) {
-                          return Expanded(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                  border: Border(
-                                      left: Br.side(i == 0
-                                          ? Colors.black26
-                                          : Colors.black))),
-                              child: InkTouch(
-                                  onTap: () =>
-                                      Get.back(result: i == 0 ? null : i),
-                                  padding: Ei.all(15),
-                                  color: i == 0 ? Colors.black12 : Colors.white,
-                                  child: Text(i == 0 ? cancelLabel : 'Kirim',
-                                      style: i == 0 ? Gfont.black : Gfont.black,
-                                      textAlign: Ta.center)),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  )
+                  // Container(
+                  //   decoration: BoxDecoration(
+                  //       border: Border(
+                  //           top: Br.side(Colors.black26.withOpacity(0.1)))),
+                  //   child: Intrinsic(
+                  //     children: List.generate(
+                  //       2,
+                  //       (i) {
+                  //         return Expanded(
+                  //           child: Container(
+                  //             decoration: BoxDecoration(
+                  //                 border: Border(
+                  //                     left: Br.side(i == 0
+                  //                         ? Colors.white70
+                  //                         : Colors.black26.withOpacity(0.1)))),
+                  //             child: InkTouch(
+                  //                 onTap: () =>
+                  //                     Get.back(result: i == 0 ? null : i),
+                  //                 padding: Ei.all(15),
+                  //                 color: i == 0 ? Colors.black12 : Colors.white,
+                  //                 child: Text(i == 0 ? cancelLabel : 'Kirim',
+                  //                     style: i == 0 ? Gfont.black : Gfont.black,
+                  //                     textAlign: Ta.center)),
+                  //           ),
+                  //         );
+                  //       },
+                  //     ),
+                  //   ),
+                  // )
                 ],
               ),
             )),
@@ -242,49 +243,351 @@ class WiDialogForm extends StatelessWidget {
   }
 }
 
-class CountdownTimerWidget extends StatefulWidget {
+class SecondCountDown extends StatelessWidget {
   final int seconds;
+  final double fontSize;
 
-  CountdownTimerWidget({Key? key, required this.seconds}) : super(key: key);
+  const SecondCountDown(this.seconds, {Key? key, this.fontSize = 15.5})
+      : super(key: key);
 
   @override
-  _CountdownTimerWidgetState createState() => _CountdownTimerWidgetState();
+  Widget build(BuildContext context) {
+    return StreamBuilder(
+      stream: Stream.periodic(Duration(seconds: 1), (i) => i),
+      builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
+        int now = DateTime.now().millisecondsSinceEpoch;
+        int expiredTime =
+            now + (seconds * 1000); // Mengubah detik menjadi milidetik
+        Duration duration = Duration(milliseconds: expiredTime - now);
+
+        int minutesRemaining = duration.inMinutes.remainder(60);
+        int secondsRemaining = duration.inSeconds.remainder(60);
+
+        String countdown = duration.inSeconds <= 0
+            ? '00:00'
+            : '$minutesRemaining:${secondsRemaining.toString().padLeft(2, '0')}';
+
+        return Text('Pompa Hidup Selama ($countdown)',
+            style: TextStyle(color: Colors.red, fontSize: fontSize));
+      },
+    );
+  }
 }
 
-class _CountdownTimerWidgetState extends State<CountdownTimerWidget> {
-  late int remainingSeconds;
-  late Timer? _timer;
+class SelectPicker {
+  static show(BuildContext context,
+      {required List<Option> options,
+      Function(Option)? onSelect,
+      Option? initialValue,
+      String? textConfirm,
+      bool fullScreen = false,
+      double? height,
+      int maxLines = 1}) {
+    context.bottomSheet(
+        SelectPickerWidget(
+            initialValue: initialValue,
+            options: options,
+            fullScreen: fullScreen,
+            onSelect: onSelect,
+            maxLines: maxLines,
+            height: height),
+        backgroundColor: Colors.transparent,
+        safeArea: !fullScreen);
+  }
+}
+
+class SelectPickerWidget extends StatefulWidget {
+  /// List of available options to choose from.
+  final List<Option> options;
+
+  /// Callback function to handle the selected option.
+  final Function(Option)? onSelect;
+
+  /// Initial selected option (optional).
+  final Option? initialValue;
+
+  /// Text for the confirmation button (optional).
+  final String? textConfirm;
+
+  /// Whether to display the picker in full screen (optional).
+  final bool fullScreen;
+
+  /// Whether to display the search bar (optional).
+  final bool withSearch;
+
+  /// Maximum number of lines for option text (optional).
+  final int? maxLines;
+
+  /// Height of the picker (optional), minimum is 300.
+  final double? height;
+
+  const SelectPickerWidget(
+      {Key? key,
+      this.options = const [],
+      this.onSelect,
+      this.initialValue,
+      this.textConfirm,
+      this.fullScreen = false,
+      this.withSearch = false,
+      this.maxLines,
+      this.height})
+      : super(key: key);
+
+  @override
+  State<SelectPickerWidget> createState() => _SelectPickerWidgetState();
+}
+
+class _SelectPickerWidgetState extends State<SelectPickerWidget> {
+  final notifier = SelectPickerNotifier();
+
+  double radius = LazyUi.radius;
+  BorderRadiusGeometry borderRadius = Br.radiusOnly(tl: 0, tr: 0);
+  double magnification = 1,
+      diameterRatio = 1,
+      squeeze = 1,
+      itemExtent = 40,
+      height = 300,
+      maxLines = 1;
+
+  double toDecimal(double value) {
+    return value >= 1000 ? .4 : value / pow(10, value.ceil().toString().length);
+  }
+
+  void onInitials() {
+    borderRadius = Br.radiusOnly(tl: radius, tr: radius);
+
+    int i = widget.options.indexWhere(
+        (e) => e.toMap().toString() == widget.initialValue?.toMap().toString());
+    i = (i == -1 ? 0 : i);
+
+    // set initial index
+    notifier.index = i;
+    notifier.scroll = FixedExtentScrollController(initialItem: i);
+
+    notifier.options = widget.options.map((e) => e.option).toList();
+    notifier.values = widget.options.map((e) => e.value).toList();
+
+    // set original data
+    notifier.originalOptions = notifier.options;
+    notifier.originalValues = notifier.values;
+
+    notifier.result = notifier.values.isEmpty
+        ? {'option': notifier.options.isEmpty ? null : notifier.options[i]}
+        : {
+            'option': notifier.options.isEmpty ? null : notifier.options[i],
+            'value': notifier.values.isEmpty ? null : notifier.values[i]
+          };
+
+    maxLines = (widget.maxLines ?? 1).toDouble();
+
+    if (maxLines >= 4) {
+      maxLines = 4;
+    }
+
+    magnification = maxLines > 1
+        ? 1
+        : widget.fullScreen
+            ? 1.5
+            : 1.2;
+    diameterRatio = widget.fullScreen ? 1 : .8;
+    squeeze = 1.2;
+    itemExtent = 40 * maxLines;
+
+    height = widget.fullScreen ? context.height : 300;
+
+    if (maxLines > 2) {
+      height += (20 * maxLines);
+    }
+
+    if (widget.height != null && !widget.fullScreen) {
+      height = widget.height! < 300 ? 300 : widget.height!;
+    }
+
+    notifier.setHeight(height);
+  }
 
   @override
   void initState() {
     super.initState();
-    remainingSeconds = widget.seconds;
-    if (remainingSeconds > 0) {
-      _startTimer();
-    }
-  }
 
-  @override
-  Widget build(BuildContext context) {
-    return remainingSeconds <= 0
-        ? Text('Timer Finished')
-        : Text('Remaining Time: $remainingSeconds seconds');
-  }
-
-  void _startTimer() {
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
-      setState(() {
-        remainingSeconds--;
-        if (remainingSeconds <= 0) {
-          _timer?.cancel();
-        }
-      });
-    });
+    onInitials();
   }
 
   @override
   void dispose() {
-    _timer?.cancel();
+    notifier.dispose();
     super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    bool isMobile = context.width < 600;
+
+    return FractionallySizedBox(
+      widthFactor: isMobile ? 1 : toDecimal(context.width),
+      child: ClipRRect(
+        borderRadius: borderRadius,
+        child: Stack(
+          alignment: AlignmentDirectional.bottomCenter,
+          children: [
+            ScrollConfiguration(
+              behavior: Unglow(),
+              child: notifier.watch((state) => AnimatedContainer(
+                    duration: 150.ms,
+                    height: state.height,
+                    decoration: BoxDecoration(
+                        color: Colors.white, borderRadius: borderRadius),
+                    child: SafeArea(
+                      top: false,
+                      child: Column(
+                        children: [
+                          Expanded(
+                            child: CupertinoPicker(
+                                magnification: magnification,
+                                useMagnifier: false,
+                                itemExtent: itemExtent,
+                                offAxisFraction: 0,
+                                diameterRatio: diameterRatio,
+                                squeeze: squeeze,
+                                scrollController: notifier.scroll,
+                                selectionOverlay: Container(
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                      border: Br.only(['b', 't'])),
+                                ),
+
+                                // This is called when selected item is changed.
+                                onSelectedItemChanged: (int selectedItem) {
+                                  if (widget.onSelect != null) {
+                                    notifier.index = selectedItem;
+                                    int i = notifier.index;
+
+                                    if (notifier.values.isNotEmpty) {
+                                      notifier.result = {
+                                        'option': notifier.options[i],
+                                        'value': notifier.values.length < i
+                                            ? null
+                                            : notifier.values[i]
+                                      };
+                                    } else {
+                                      notifier.result = {
+                                        'option': notifier.options[i]
+                                      };
+                                    }
+                                  }
+                                },
+                                children: List<Widget>.generate(
+                                    notifier.options.length, (int index) {
+                                  return Center(
+                                    child: Container(
+                                      constraints: BoxConstraints(
+                                          maxWidth: context.width * .75),
+                                      child: Text(
+                                        notifier.options[index],
+                                        overflow: Tof.ellipsis,
+                                        textAlign: Ta.center,
+                                        maxLines: maxLines.toInt(),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium
+                                            ?.copyWith(fontSize: 16),
+                                      ),
+                                    ),
+                                  );
+                                })),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )),
+            ),
+            Positioned.fill(
+                child: Align(
+                    alignment: Alignment.bottomCenter,
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        mainAxisAlignment: Maa.center,
+                        children: [
+                          const SizedBox(width: 60),
+                          SlideUp(
+                            delay: 300,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Utils.hex('fafafa'),
+                                    spreadRadius: 15,
+                                    blurRadius: 25,
+                                    offset: const Offset(0, -5),
+                                  ),
+                                ],
+                              ),
+                              child: Builder(builder: (context) {
+                                String confirm = widget.textConfirm ?? 'Select';
+
+                                return InkTouch(
+                                    onTap: () {
+                                      if (widget.onSelect != null) {
+                                        widget.onSelect?.call(
+                                            Option.fromMap(notifier.result));
+                                        Navigator.pop(context);
+                                      }
+                                    },
+                                    padding: Ei.sym(
+                                        v: 13,
+                                        h: confirm.length > 25 ? 25 : 45),
+                                    radius: Br.radius(25),
+                                    color: Utils.hex('fff'),
+                                    border: Br.all(),
+                                    child: Container(
+                                      constraints: BoxConstraints(
+                                          maxWidth: context.width * .4),
+                                      child: Text(
+                                        confirm,
+                                        textAlign: Ta.center,
+                                        maxLines: 1,
+                                        overflow: Tof.ellipsis,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium
+                                            ?.copyWith(
+                                              fontWeight: Fw.bold,
+                                              color: LzColors.black,
+                                            ),
+                                      ),
+                                    ));
+                              }),
+                            ),
+                          ),
+                          Touch(
+                            onTap: () => context.lzPop(),
+                            child: SlideUp(
+                              delay: 400,
+                              child: Iconr(
+                                La.times,
+                                padding: Ei.all(20),
+                              ),
+                            ),
+                          )
+                        ],
+                      ).margin(b: 15, l: 0),
+                    ))),
+
+            // search bar
+            Poslign(
+              alignment: Alignment.topLeft,
+              child: Row(
+                children: [
+                  notifier.watch((state) => state.found == 0
+                      ? const None()
+                      : Textr(state.found.toString(), margin: Ei.only(r: 15)))
+                ],
+              ).margin(all: 5),
+            )
+          ],
+        ),
+      ),
+    );
   }
 }
