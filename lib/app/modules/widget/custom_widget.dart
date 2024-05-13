@@ -245,9 +245,11 @@ class WiDialogForm extends StatelessWidget {
 
 class SecondCountDown extends StatelessWidget {
   final int seconds;
+  final String text;
   final double fontSize;
 
-  const SecondCountDown(this.seconds, {Key? key, this.fontSize = 15.5})
+  const SecondCountDown(this.text, this.seconds,
+      {Key? key, this.fontSize = 15.5})
       : super(key: key);
 
   @override
@@ -267,7 +269,7 @@ class SecondCountDown extends StatelessWidget {
             ? '00:00'
             : '$minutesRemaining:${secondsRemaining.toString().padLeft(2, '0')}';
 
-        return Text('Pompa Hidup Selama ($countdown)',
+        return Text('$text Hidup Selama ($countdown)',
             style: TextStyle(color: Colors.red, fontSize: fontSize));
       },
     );

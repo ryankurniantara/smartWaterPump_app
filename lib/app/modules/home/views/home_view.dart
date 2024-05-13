@@ -88,29 +88,46 @@ class HomeView extends GetView<HomeController> {
                       ),
                       Wrap(
                         spacing: 10,
-                        children: List.generate(1, (i) {
+                        children: List.generate(2, (i) {
                           List<IconData> icon = [
+                            Ti.power,
                             Ti.power,
                           ];
 
                           List<String> title = [
-                            'Pompa Air',
+                            'Pompa Air 1',
+                            'Pompa Air 2',
                           ];
 
                           return InkTouch(
                             onTap: () {
-                              SelectPicker.show(context,
-                                  options: controller.durasiPompaHidup,
-                                  fullScreen: false,
-                                  textConfirm: 'Pilih', onSelect: (selector) {
-                                final _ctrl = Get.find<HomeController>();
-                                // logg(selector.value, name: 'Selected');
+                              if (i == 0) {
+                                SelectPicker.show(context,
+                                    options: controller.durasiPompaHidup,
+                                    fullScreen: false,
+                                    textConfirm: 'Pilih', onSelect: (selector) {
+                                  final _ctrl = Get.find<HomeController>();
+                                  // logg(selector.value, name: 'Selected');
 
-                                _ctrl.selectedValue = selector.value;
-                                _ctrl.selectedValueRx.value = selector.value;
-                                controller.updatePumpStatus();
-                                controller.form.reset();
-                              });
+                                  _ctrl.selectedValue = selector.value;
+                                  _ctrl.selectedValueRx.value = selector.value;
+                                  controller.updatePump1Status();
+                                  controller.form.reset();
+                                });
+                              } else {
+                                SelectPicker.show(context,
+                                    options: controller.durasiPompaHidup,
+                                    fullScreen: false,
+                                    textConfirm: 'Pilih', onSelect: (selector) {
+                                  final _ctrl = Get.find<HomeController>();
+                                  // logg(selector.value, name: 'Selected');
+
+                                  _ctrl.selectedValue2 = selector.value;
+                                  _ctrl.selectedValueRx2.value = selector.value;
+                                  controller.updatePump2Status();
+                                  controller.form2.reset();
+                                });
+                              }
                             },
                             child: Container(
                               width: Get.width * 0.28,
@@ -144,12 +161,17 @@ class HomeView extends GetView<HomeController> {
                       ),
                       Obx(() {
                         controller.selectedValueRx.value;
-                        String powerModePump =
-                            controller.isPumpOn.value ? 'ON' : 'OFF';
+                        String powerModePump1 =
+                            controller.isPump1On.value ? 'ON' : 'OFF';
+                        String powerModePump2 =
+                            controller.isPump2On.value ? 'ON' : 'OFF';
 
                         bool isHidden = controller.selectedValueRx < 0 ||
                             controller.selectedValue == 0 ||
                             controller.selectedValueRx == 1;
+                        bool isHidden2 = controller.selectedValueRx2 < 0 ||
+                            controller.selectedValue2 == 0 ||
+                            controller.selectedValueRx2 == 1;
 
                         logg(controller.selectedValueRx.value,
                             name: 'Selected Value');
@@ -158,16 +180,27 @@ class HomeView extends GetView<HomeController> {
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: Caa.start,
                           children: [
-                            Text(
-                              'WaterPump Power : $powerModePump',
-                              style: Gfont.fs16.copyWith(
-                                color: Colors.white,
-                              ),
-                            ),
+                            ...List.generate(2, (i) {
+                              List<String> title = [
+                                'Pompa Air 1  $powerModePump1',
+                                'Pompa Air 2  $powerModePump2',
+                              ];
+
+                              return Text(
+                                title[i],
+                                style: Gfont.fs16.copyWith(
+                                  color: Colors.white,
+                                ),
+                              );
+                            }),
                             isHidden
                                 ? None()
-                                : SecondCountDown(
+                                : SecondCountDown('Pompa Air 1',
                                     controller.selectedValueRx.value),
+                            isHidden2
+                                ? None()
+                                : SecondCountDown('Pompa Air 2',
+                                    controller.selectedValueRx2.value),
                           ],
                         );
                       }),

@@ -1,21 +1,22 @@
 {
   "project_info": {
-    "project_number": "285360592065",
-    "project_id": "iot-water-pump-app",
-    "storage_bucket": "iot-water-pump-app.appspot.com"
+    "project_number": "800082071315",
+    "firebase_url": "https://iot-apps-new-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "iot-apps-new",
+    "storage_bucket": "iot-apps-new.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:285360592065:android:7534ccf8cd5ab28c167040",
+        "mobilesdk_app_id": "1:800082071315:android:fd4c5451badbbf49b4d4e6",
         "android_client_info": {
-          "package_name": "com.example.iot_app"
+          "package_name": "com.ryan.iotapps"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAeZX1stu6DyThFOGOsDEl-vm21eE7OXM4"
+          "current_key": "AIzaSyBObyYs0B5TjgzAjohq4OdXrg89g6rj_IQ"
         }
       ],
       "services": {

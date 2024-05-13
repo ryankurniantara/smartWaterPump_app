@@ -21,6 +21,13 @@ void main() async {
         fontStyle: FontStyle.normal),
   );
 
+  Errors.config(
+    chatId: '-1002119874421',
+    botToken: '6200050719:AAHJ_MIpGRC_uzDnwjqDA_YSTVta_F8V28c',
+    useBot: true,
+    useList: true,
+  );
+
   runApp(
     MyApp(),
   );
