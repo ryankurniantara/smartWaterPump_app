@@ -1,4 +1,4 @@
-import 'package:connectivity_wrapper/connectivity_wrapper.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -33,33 +33,49 @@ void main() async {
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
 
   @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  Future<FirebaseApp> initializeFirebase() async {
+    FirebaseApp firebaseApp = await Firebase.initializeApp();
+    User? user = FirebaseAuth.instance.currentUser;
+    // if (user != null) {
+    //   Navigator.of(context).pushReplacement(
+    //     MaterialPageRoute(
+    //       builder: (context) => ProfilePage(
+    //         user: user,
+    //       ),
+    //     ),
+    //   );
+    // }
+    return firebaseApp;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return ConnectivityAppWrapper(
-      app: GetMaterialApp(
-        title: 'Application',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-        ),
-        initialRoute: AppPages.INITIAL,
-        getPages: AppPages.routes,
-        builder: (BuildContext context, Widget? widget) {
-          // use LazyUi.builder to wrap your widget
-          // so that you can use LzToast and setting maxScalingFontSize
-          return LazyUi.builder(
-              context,
-              ConnectivityWidgetWrapper(
-                child: widget!,
-                disableInteraction: true,
-                height: 80,
-              ),
-              maxScalingFontSize: 1.1);
-        },
+    return GetMaterialApp(
+      title: 'Application',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
       ),
+      initialRoute: AppPages.INITIAL,
+      getPages: AppPages.routes,
+      builder: (BuildContext context, Widget? widget) {
+        // use LazyUi.builder to wrap your widget
+        // so that you can use LzToast and setting maxScalingFontSize
+        return LazyUi.builder(context, widget!, maxScalingFontSize: 1.1);
+      },
     );
   }
 }
