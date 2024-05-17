@@ -269,8 +269,20 @@ class SecondCountDown extends StatelessWidget {
             ? '00:00'
             : '$minutesRemaining:${secondsRemaining.toString().padLeft(2, '0')}';
 
-        return Text('$text Hidup Selama ($countdown)',
-            style: TextStyle(color: Colors.red, fontSize: fontSize));
+        return Container(
+          padding: Ei.all(10),
+          decoration: BoxDecoration(
+              color: Colors.red[600],
+              borderRadius: Br.radius(5),
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 5,
+                    offset: Offset(0, 5))
+              ]),
+          child: Text('$text Hidup Selama ($countdown)',
+              style: TextStyle(color: Colors.white, fontSize: fontSize)),
+        );
       },
     );
   }
