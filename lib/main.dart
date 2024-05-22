@@ -27,39 +27,19 @@ void main() async {
     useBot: true,
     useList: true,
   );
+  User? user = FirebaseAuth.instance.currentUser;
 
+  bool isLoggedIn = user != null;
   runApp(
-    MyApp(),
+    MyApp(
+      isLoggedIn: isLoggedIn,
+    ),
   );
 }
 
-class MyApp extends StatefulWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  Future<FirebaseApp> initializeFirebase() async {
-    FirebaseApp firebaseApp = await Firebase.initializeApp();
-    User? user = FirebaseAuth.instance.currentUser;
-    // if (user != null) {
-    //   Navigator.of(context).pushReplacement(
-    //     MaterialPageRoute(
-    //       builder: (context) => ProfilePage(
-    //         user: user,
-    //       ),
-    //     ),
-    //   );
-    // }
-    return firebaseApp;
-  }
+class MyApp extends StatelessWidget {
+  final bool isLoggedIn;
+  const MyApp({super.key, required this.isLoggedIn});
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +49,7 @@ class _MyAppState extends State<MyApp> {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      initialRoute: AppPages.INITIAL,
+      initialRoute: isLoggedIn ? AppPages.INITIAL : Routes.LOGIN,
       getPages: AppPages.routes,
       builder: (BuildContext context, Widget? widget) {
         // use LazyUi.builder to wrap your widget
