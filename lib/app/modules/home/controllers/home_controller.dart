@@ -1,11 +1,13 @@
 import 'dart:async';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:get/get.dart';
 import 'package:lazyui/lazyui.dart';
 
 class HomeController extends GetxController {
   final DatabaseReference _collection = FirebaseDatabase.instance.ref();
+  FirebaseAuth auth = FirebaseAuth.instance;
 
   String mode = "arduino";
   RxBool isPump1On = false.obs;
@@ -32,8 +34,9 @@ class HomeController extends GetxController {
 
   List<Option> durasiPompaHidup = [
     Option(option: 'Hidupkan', value: 1),
-    Option(option: 'Matikan', value: 0),
     Option(option: 'Hidupkan Selama 1 Menit', value: 60),
+    Option(option: 'Hidupkan Selama 15 Menit', value: 900),
+    Option(option: 'Matikan', value: 0),
   ];
 
   Map<String, FormModel> form = LzForm.make(['operation']);
@@ -53,15 +56,10 @@ class HomeController extends GetxController {
         case 1:
           if (_timer != null) _timer!.cancel();
 
-          if (isPump1On == true) {
-            LzToast.show('Pompa Air 1 Dihidupkan dan Mematikan fitur Timer');
-            return;
-          } else {
-            selectedValueRx.value = 1;
-            selectedValue = 0;
-            LzToast.show('Pompa Air 1 Dihidupkan');
-            await _collection.child('power_pump_1').set(1);
-          }
+          selectedValueRx.value = 1;
+          selectedValue = 0;
+          LzToast.show('Pompa Air 1 Dihidupkan');
+          await _collection.child('power_pump_1').set(1);
 
           break;
         case 0:
@@ -78,6 +76,30 @@ class HomeController extends GetxController {
           if (_timer != null) _timer!.cancel();
 
           LzToast.show('Pompa Air 1 Dihidupkan Selama 1 Menit');
+          await _collection.child('power_pump_1').set(1);
+
+          _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+            selectedValue--;
+            selectedValueRx.value--;
+            logg(selectedValue, color: LogColor.red, name: 'Timer');
+            if (selectedValue == 0 ||
+                selectedValueRx.value == 0 ||
+                selectedValue < 0 ||
+                selectedValueRx.value < 0) {
+              _timer!.cancel();
+
+              _collection.child('power_pump_1').set(0);
+              logg('Pompa Air 1 Dimatikan');
+              LzToast.show('Pompa Air 1 Dimatikan');
+            }
+          });
+
+          break;
+        case 900:
+          // Prefenting Multiple Timer
+          if (_timer != null) _timer!.cancel();
+
+          LzToast.show('Pompa Air 1 Dihidupkan Selama 15 Menit');
           await _collection.child('power_pump_1').set(1);
 
           _timer = Timer.periodic(Duration(seconds: 1), (timer) {
@@ -154,6 +176,30 @@ class HomeController extends GetxController {
           });
 
           break;
+        case 900:
+          // Prefenting Multiple Timer
+          if (_timer != null) _timer!.cancel();
+
+          LzToast.show('Pompa Air 1 Dihidupkan Selama 15 Menit');
+          await _collection.child('power_pump_1').set(1);
+
+          _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+            selectedValue--;
+            selectedValueRx.value--;
+            logg(selectedValue, color: LogColor.red, name: 'Timer');
+            if (selectedValue == 0 ||
+                selectedValueRx.value == 0 ||
+                selectedValue < 0 ||
+                selectedValueRx.value < 0) {
+              _timer!.cancel();
+
+              _collection.child('power_pump_1').set(0);
+              logg('Pompa Air 1 Dimatikan');
+              LzToast.show('Pompa Air 1 Dimatikan');
+            }
+          });
+
+          break;
         default:
       }
     } catch (e, s) {
@@ -163,6 +209,15 @@ class HomeController extends GetxController {
 
   double secondsToMinutes(int seconds) {
     return seconds / 60;
+  }
+
+  Future logOut() async {
+    try {
+      await auth.signOut();
+      Get.offAllNamed('/login');
+    } catch (e, s) {
+      Errors.check(e, s);
+    }
   }
 
   @override

@@ -243,7 +243,7 @@ class WiDialogForm extends StatelessWidget {
   }
 }
 
-class SecondCountDown extends StatelessWidget {
+class SecondCountDown extends StatefulWidget {
   final int seconds;
   final String text;
   final double fontSize;
@@ -253,35 +253,50 @@ class SecondCountDown extends StatelessWidget {
       : super(key: key);
 
   @override
+  _SecondCountDownState createState() => _SecondCountDownState();
+}
+
+class _SecondCountDownState extends State<SecondCountDown> {
+  late DateTime _endTime;
+
+  @override
+  void initState() {
+    super.initState();
+    _endTime = DateTime.now().add(Duration(seconds: widget.seconds));
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return StreamBuilder(
+    return StreamBuilder<int>(
       stream: Stream.periodic(Duration(seconds: 1), (i) => i),
       builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
-        int now = DateTime.now().millisecondsSinceEpoch;
-        int expiredTime =
-            now + (seconds * 1000); // Mengubah detik menjadi milidetik
-        Duration duration = Duration(milliseconds: expiredTime - now);
+        final now = DateTime.now();
+        final remainingDuration = _endTime.difference(now);
 
-        int minutesRemaining = duration.inMinutes.remainder(60);
-        int secondsRemaining = duration.inSeconds.remainder(60);
+        final minutesRemaining = remainingDuration.inMinutes.remainder(60);
+        final secondsRemaining = remainingDuration.inSeconds.remainder(60);
 
-        String countdown = duration.inSeconds <= 0
+        final countdown = remainingDuration.inSeconds <= 0
             ? '00:00'
             : '$minutesRemaining:${secondsRemaining.toString().padLeft(2, '0')}';
 
         return Container(
-          padding: Ei.all(10),
+          padding: EdgeInsets.all(10),
           decoration: BoxDecoration(
-              color: Colors.red[600],
-              borderRadius: Br.radius(5),
-              boxShadow: [
-                BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 5,
-                    offset: Offset(0, 5))
-              ]),
-          child: Text('$text Hidup Selama ($countdown)',
-              style: TextStyle(color: Colors.white, fontSize: fontSize)),
+            color: Colors.red[600],
+            borderRadius: BorderRadius.circular(5),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 5,
+                offset: Offset(0, 5),
+              )
+            ],
+          ),
+          child: Text(
+            '${widget.text} Hidup Selama ($countdown)',
+            style: TextStyle(color: Colors.white, fontSize: widget.fontSize),
+          ),
         );
       },
     );
@@ -538,7 +553,7 @@ class _SelectPickerWidgetState extends State<SelectPickerWidget> {
                                 ],
                               ),
                               child: Builder(builder: (context) {
-                                String confirm = widget.textConfirm ?? 'Select';
+                                String confirm = widget.textConfirm ?? 'PROSES';
 
                                 return InkTouch(
                                     onTap: () {
